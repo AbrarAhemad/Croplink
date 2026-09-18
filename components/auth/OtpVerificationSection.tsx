@@ -69,8 +69,15 @@ export function OtpVerificationSection({
 
       setOtpSent(true);
       setCooldown(30);
-      setOtpMode(data.mode || 'demo');
-      setMessage(data.message || t('otp.sentSuccess'));
+      const mode = data.mode || 'demo';
+      setOtpMode(mode);
+
+      // In Demo Mode, clear bottom message box to avoid any message duplication
+      if (mode === 'sms') {
+        setMessage(data.message || t('otp.smsSentSuccess'));
+      } else {
+        setMessage(null);
+      }
 
       if (data.demoOtp) {
         setDemoCode(data.demoOtp);
