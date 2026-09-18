@@ -183,6 +183,12 @@ export const en: TranslationSchema = {
     gmailAlreadyRegistered: 'This Gmail address is already registered.',
     enter6Digit: 'Enter the 6-digit OTP',
     verificationRequired: 'Mobile number verification required',
+    demoOtpReady: 'Demo OTP ready',
+    demoVerificationCode: 'Demo verification code:',
+    demoNoSmsSent: 'Demo mode — no SMS is sent.',
+    verifiedSuccessfully: 'Mobile number verified successfully.',
+    smsSentSuccess: 'Verification code sent via SMS.',
+    smsConfigError: 'SMS provider configuration missing or invalid.',
   },
   farmerRegister: {
     title: 'Farmer & FPO Registration',

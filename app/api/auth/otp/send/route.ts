@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     const normMob = mobVal.normalized;
 
-    // Check duplicate mobile
+    // Check duplicate mobile across system
     const uniqueness = checkAccountUniqueness(normMob, undefined);
     if (uniqueness.mobileExists) {
       return NextResponse.json(
@@ -24,8 +24,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check resend cooldown
-    const cooldown = checkResendCooldown(normMob, 'MOBILE_REGISTRATION');
+    // Check 30-second resend cooldown
+    const cooldown = await checkResendCooldown(normMob, 'MOBILE_REGISTRATION');
     if (!cooldown.allowed) {
       return NextResponse.json(
         {
@@ -40,15 +40,27 @@ export async function POST(req: Request) {
 
     // Generate secure 6-digit OTP
     const otp = generate6DigitOTP();
-    createOTPSession(normMob, 'MOBILE_REGISTRATION', otp);
+    await createOTPSession(normMob, 'MOBILE_REGISTRATION', otp);
 
-    // Send via OTP Provider
+    // Send via OTP Provider (Demo or SMS mode)
     const provider = getOTPProvider();
     const result = await provider.sendSMS(normMob, otp);
 
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          mode: result.mode,
+          error: result.error || 'Failed to dispatch verification code. Please verify configuration.',
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      message: 'OTP sent successfully to ' + normMob,
+      mode: result.mode,
+      message: result.message,
       demoOtp: result.demoOtp,
     });
   } catch (error) {

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     // Validate reset session token
-    const tokenVal = validateResetToken(resetToken);
+    const tokenVal = await validateResetToken(resetToken);
     if (!tokenVal.valid || !tokenVal.email) {
       return NextResponse.json({ success: false, error: tokenVal.error }, { status: 400 });
     }
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     // Consumes token to prevent reuse
-    consumeResetToken(resetToken);
+    await consumeResetToken(resetToken);
 
     return NextResponse.json({
       success: true,

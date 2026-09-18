@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     // SERVER-SIDE MANDATORY OTP CHECK
-    const verified = isMobileVerifiedForRegistration(mobVal.normalized);
+    const verified = await isMobileVerifiedForRegistration(mobVal.normalized);
     if (!verified) {
       return NextResponse.json(
         { success: false, error: 'Mobile number verification is required before submitting registration.', code: 'OTP_REQUIRED' },
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     });
 
     // Consume verification on success
-    consumeMobileVerification(mobVal.normalized);
+    await consumeMobileVerification(mobVal.normalized);
 
     return NextResponse.json({
       success: true,

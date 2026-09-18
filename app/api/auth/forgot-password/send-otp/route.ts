@@ -15,14 +15,8 @@ export async function POST(req: Request) {
 
     const normEmail = gmailVal.normalized;
 
-    // Generic security response message
-    const genericResponse = {
-      success: true,
-      message: "If an account exists for this email address, a verification code has been sent.",
-    };
-
-    // Check resend cooldown
-    const cooldown = checkResendCooldown(normEmail, 'PASSWORD_RESET');
+    // Check 30-second resend cooldown
+    const cooldown = await checkResendCooldown(normEmail, 'PASSWORD_RESET');
     if (!cooldown.allowed) {
       return NextResponse.json(
         {
@@ -39,19 +33,24 @@ export async function POST(req: Request) {
     // If user exists, generate & send OTP
     if (user) {
       const otp = generate6DigitOTP();
-      createOTPSession(normEmail, 'PASSWORD_RESET', otp);
+      await createOTPSession(normEmail, 'PASSWORD_RESET', otp);
 
       const provider = getOTPProvider();
       const result = await provider.sendEmail(normEmail, otp, 'PASSWORD_RESET');
 
       return NextResponse.json({
-        ...genericResponse,
+        success: true,
+        mode: result.mode,
+        message: result.message,
         demoOtp: result.demoOtp,
       });
     }
 
-    // If account doesn't exist, return same generic response to prevent account enumeration
-    return NextResponse.json(genericResponse);
+    // Generic security response for non-existent users
+    return NextResponse.json({
+      success: true,
+      message: 'If an account exists for this email address, a verification code has been sent.',
+    });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to process request. Please try again.' }, { status: 500 });
   }

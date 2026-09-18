@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n/context';
-import { ShieldCheck, AlertCircle, CheckCircle2, RefreshCw, KeyRound } from 'lucide-react';
+import { ShieldCheck, AlertCircle, CheckCircle2, RefreshCw, KeyRound, Info } from 'lucide-react';
 
 function VerifyResetOtpContent() {
   const router = useRouter();
@@ -96,7 +96,7 @@ function VerifyResetOtpContent() {
       }
 
       setCooldown(30);
-      setMessage(t('otp.sentSuccess'));
+      setMessage(data.message || t('otp.sentSuccess'));
       if (data.demoOtp) setDemoCode(data.demoOtp);
     } catch (err) {
       setResending(false);
@@ -154,17 +154,25 @@ function VerifyResetOtpContent() {
       <form onSubmit={handleVerify} className="bg-[#FFFDF8] rounded-md border border-[#DDD8CC] shadow-sm p-6 space-y-5">
         {email && (
           <div className="text-xs font-bold text-[#252A27] bg-[#F7F3EA] p-3 rounded-md border border-[#DDD8CC] flex items-center justify-between">
-            <span>Sent to: <strong className="text-[#23483A]">{email}</strong></span>
+            <span>Destination: <strong className="text-[#23483A]">{email}</strong></span>
             <Link href="/forgot-password" className="text-[11px] text-[#23483A] hover:underline">Change</Link>
           </div>
         )}
 
         {demoCode && (
-          <div className="p-2 bg-[#23483A]/10 text-[#23483A] text-xs font-bold rounded border border-[#23483A]/20 flex items-center justify-between">
-            <span>⚡ Demo Mode Test OTP:</span>
-            <span className="font-mono text-sm tracking-wider font-extrabold bg-white px-2 py-0.5 rounded border border-[#23483A]/30">
-              {demoCode}
-            </span>
+          <div className="p-3 bg-[#23483A]/10 text-[#23483A] text-xs font-bold rounded-md border border-[#23483A]/20 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-extrabold text-xs flex items-center gap-1.5">
+                <Info className="w-4 h-4" />
+                {t('otp.demoOtpReady')}
+              </span>
+              <span className="font-mono text-sm tracking-wider font-extrabold bg-white text-[#23483A] px-2.5 py-0.5 rounded border border-[#23483A]/30">
+                {t('otp.demoVerificationCode')} {demoCode}
+              </span>
+            </div>
+            <p className="text-[11px] text-[#23483A]/80 font-medium">
+              ⚡ {t('otp.demoNoSmsSent')}
+            </p>
           </div>
         )}
 

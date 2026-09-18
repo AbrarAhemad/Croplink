@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: mobVal.error }, { status: 400 });
     }
 
-    const result = verifyOTP(mobVal.normalized, 'MOBILE_REGISTRATION', otp);
+    const result = await verifyOTP(mobVal.normalized, 'MOBILE_REGISTRATION', otp);
     if (!result.success) {
       return NextResponse.json({ success: false, error: result.error, code: result.code }, { status: 400 });
     }

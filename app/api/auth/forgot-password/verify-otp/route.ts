@@ -17,13 +17,13 @@ export async function POST(req: Request) {
 
     const normEmail = gmailVal.normalized;
 
-    const result = verifyOTP(normEmail, 'PASSWORD_RESET', otp);
+    const result = await verifyOTP(normEmail, 'PASSWORD_RESET', otp);
     if (!result.success) {
       return NextResponse.json({ success: false, error: result.error, code: result.code }, { status: 400 });
     }
 
     // Generate single-use password reset authorization token
-    const resetToken = createResetToken(normEmail);
+    const resetToken = await createResetToken(normEmail);
 
     return NextResponse.json({
       success: true,

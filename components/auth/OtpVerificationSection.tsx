@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
-import { ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Smartphone } from 'lucide-react';
+import { maskMobile } from '@/lib/auth/validation';
+import { ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Smartphone, Info } from 'lucide-react';
 
 interface OtpVerificationSectionProps {
   mobile: string;
@@ -26,13 +27,14 @@ export function OtpVerificationSection({
 
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [otpMode, setOtpMode] = useState<'demo' | 'sms'>('demo');
   const [demoCode, setDemoCode] = useState<string | null>(null);
 
   const [cooldown, setCooldown] = useState(0);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Countdown Timer
+  // Countdown Timer for Resend Cooldown (30s)
   useEffect(() => {
     if (cooldown <= 0) return;
     const timer = setInterval(() => {
@@ -40,14 +42,6 @@ export function OtpVerificationSection({
     }, 1000);
     return () => clearInterval(timer);
   }, [cooldown]);
-
-  // Mask Mobile Number for Display: +91 98******10
-  const getMaskedMobile = (mob: string) => {
-    const cleaned = mob.replace(/[^\d]/g, '');
-    if (cleaned.length < 10) return mob;
-    const last10 = cleaned.slice(-10);
-    return `+91 ${last10.slice(0, 2)}******${last10.slice(-2)}`;
-  };
 
   const handleSendOtp = async () => {
     if (!mobile || disabled) return;
@@ -75,12 +69,14 @@ export function OtpVerificationSection({
 
       setOtpSent(true);
       setCooldown(30);
+      setOtpMode(data.mode || 'demo');
       setMessage(data.message || t('otp.sentSuccess'));
+
       if (data.demoOtp) {
         setDemoCode(data.demoOtp);
       }
 
-      // Focus first input box
+      // Focus first digit input
       setTimeout(() => {
         if (inputRefs.current[0]) inputRefs.current[0].focus();
       }, 100);
@@ -97,7 +93,7 @@ export function OtpVerificationSection({
     setOtpDigits(newDigits);
     setError(null);
 
-    // Auto-advance focus
+    // Auto-advance focus to next digit box
     if (char && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -149,6 +145,7 @@ export function OtpVerificationSection({
         return;
       }
 
+      setMessage(t('otp.verifiedSuccessfully'));
       onVerificationSuccess();
     } catch (err) {
       setVerifying(false);
@@ -164,8 +161,8 @@ export function OtpVerificationSection({
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-xs font-extrabold text-[#23483A] block">✓ {t('otp.mobileVerified')}</span>
-            <span className="text-xs font-bold text-[#6F756F]">{getMaskedMobile(mobile)}</span>
+            <span className="text-xs font-extrabold text-[#23483A] block">✓ {t('otp.verifiedSuccessfully')}</span>
+            <span className="text-xs font-bold text-[#6F756F]">{maskMobile(mobile)}</span>
           </div>
         </div>
         <span className="text-[11px] font-bold text-[#23483A] bg-white px-2.5 py-1 rounded border border-[#23483A]/20">
@@ -182,13 +179,13 @@ export function OtpVerificationSection({
           <ShieldCheck className="w-5 h-5 text-[#23483A]" />
           <h4 className="text-xs font-extrabold text-[#252A27]">{t('otp.verifyMobileTitle')}</h4>
         </div>
-        {mobile && <span className="text-xs font-bold text-[#6F756F]">{getMaskedMobile(mobile)}</span>}
+        {mobile && <span className="text-xs font-bold text-[#6F756F]">{maskMobile(mobile)}</span>}
       </div>
 
       {!otpSent ? (
         <div className="space-y-3">
           <p className="text-xs text-[#6F756F] font-medium leading-relaxed">
-            Click below to receive a 6-digit verification code on your Indian mobile number via SMS.
+            Click below to generate a 6-digit verification code for your Indian mobile number.
           </p>
           <button
             type="button"
@@ -211,16 +208,25 @@ export function OtpVerificationSection({
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-xs text-[#6F756F] font-medium">
-            We sent a 6-digit verification code to <strong className="text-[#252A27]">{getMaskedMobile(mobile)}</strong>
-          </p>
-
-          {demoCode && (
-            <div className="p-2 bg-[#23483A]/10 text-[#23483A] text-xs font-bold rounded border border-[#23483A]/20 flex items-center justify-between">
-              <span>⚡ Demo Mode Test OTP:</span>
-              <span className="font-mono text-sm tracking-wider font-extrabold bg-white px-2 py-0.5 rounded border border-[#23483A]/30">
-                {demoCode}
-              </span>
+          {/* Demo Mode vs SMS Mode Banner */}
+          {otpMode === 'demo' ? (
+            <div className="p-3 bg-[#23483A]/10 text-[#23483A] text-xs font-bold rounded-md border border-[#23483A]/20 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold text-xs flex items-center gap-1.5">
+                  <Info className="w-4 h-4" />
+                  {t('otp.demoOtpReady')}
+                </span>
+                <span className="font-mono text-sm tracking-wider font-extrabold bg-white text-[#23483A] px-2.5 py-0.5 rounded border border-[#23483A]/30">
+                  {t('otp.demoVerificationCode')} {demoCode || '123456'}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#23483A]/80 font-medium">
+                {t('otp.demoNoSmsSent')}
+              </p>
+            </div>
+          ) : (
+            <div className="p-3 bg-[#23483A]/10 text-[#23483A] text-xs font-semibold rounded-md border border-[#23483A]/20">
+              {t('otp.smsSentSuccess')} <strong className="text-[#252A27]">{maskMobile(mobile)}</strong>
             </div>
           )}
 

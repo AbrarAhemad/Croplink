@@ -29,6 +29,19 @@ export function normalizeMobile(input: string): string {
 }
 
 /**
+ * Safely masks an Indian mobile number for display/logging.
+ * Format: +91 98******10 or +91 96******40
+ * Never exposes middle 6 digits.
+ */
+export function maskMobile(mobile: string): string {
+  if (!mobile) return '';
+  const cleaned = mobile.replace(/[^\d]/g, '');
+  if (cleaned.length < 10) return mobile;
+  const last10 = cleaned.slice(-10);
+  return `+91 ${last10.slice(0, 2)}******${last10.slice(-2)}`;
+}
+
+/**
  * Validates Indian Mobile Number format.
  * Requirements:
  * - Must be +91 followed by exactly 10 digits

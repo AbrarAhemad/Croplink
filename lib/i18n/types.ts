@@ -183,6 +183,12 @@ export interface TranslationSchema {
     gmailAlreadyRegistered: string;
     enter6Digit: string;
     verificationRequired: string;
+    demoOtpReady: string;
+    demoVerificationCode: string;
+    demoNoSmsSent: string;
+    verifiedSuccessfully: string;
+    smsSentSuccess: string;
+    smsConfigError: string;
   };
   farmerRegister: {
     title: string;

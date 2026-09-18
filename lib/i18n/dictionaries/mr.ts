@@ -183,6 +183,12 @@ export const mr: TranslationSchema = {
     gmailAlreadyRegistered: 'हा जीमेल पत्ता आधीपासूनच नोंदणीकृत आहे.',
     enter6Digit: '६-अंकी ओटीपी प्रविष्ट करा',
     verificationRequired: 'मोबाईल नंबर पडताळणी आवश्यक आहे',
+    demoOtpReady: 'डेमो ओटीपी तयार आहे',
+    demoVerificationCode: 'डेमो पडताळणी कोड:',
+    demoNoSmsSent: 'डेमो मोड — कोणताही एसएमएस पाठवला जात नाही.',
+    verifiedSuccessfully: 'मोबाईल क्रमांक यशस्वीरित्या पडताळला गेला.',
+    smsSentSuccess: 'एसएमएसद्वारे पडताळणी कोड पाठवला गेला.',
+    smsConfigError: 'एसएमएस प्रदाता कॉन्फिगरेशन त्रुटी.',
   },
   farmerRegister: {
     title: 'शेतकरी आणि FPO नोंदणी',
